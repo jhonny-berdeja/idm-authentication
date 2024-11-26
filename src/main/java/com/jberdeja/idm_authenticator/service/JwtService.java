@@ -1,29 +1,22 @@
 package com.jberdeja.idm_authenticator.service;
-
-
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 import java.util.function.Function;
-
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 
 @Service
 public class JwtService {
-    // Aqui hay getion de token
     public static final long JWT_TOKEN_VALIDATY = 5 * 60 * 60;
     public static final String JWT_SECRET = "ClientSecret1ClientSecret2ClientSecret3XXX";
 
     private Claims getAllClaimsFromToken(String token){
-        
         final var key = Keys.hmacShaKeyFor(JWT_SECRET.getBytes(StandardCharsets.UTF_8));
-
         return Jwts
         .parserBuilder()
         .setSigningKey(key)
@@ -74,8 +67,6 @@ public class JwtService {
     public Boolean validateToken(String token, UserDetails userDetails){
         final var usernameFromUserDetails = userDetails.getUsername();
         final var usernameFromJWT = this.getUsernameFromToken(token);
-
         return(usernameFromUserDetails.equals(usernameFromJWT)) && this.isNotTokenExpired(token);
-        
     }
 }
