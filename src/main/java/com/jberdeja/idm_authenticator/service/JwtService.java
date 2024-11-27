@@ -15,38 +15,6 @@ public class JwtService {
     public static final long JWT_TOKEN_VALIDATY = 5 * 60 * 60;
     public static final String JWT_SECRET = "ClientSecret1ClientSecret2ClientSecret3XXX";
 
-    private Claims getAllClaimsFromToken(String token){
-        final var key = Keys.hmacShaKeyFor(JWT_SECRET.getBytes(StandardCharsets.UTF_8));
-        return Jwts
-        .parserBuilder()
-        .setSigningKey(key)
-        .build()
-        .parseClaimsJws(token)
-        .getBody();
-    }
-
-    public <T> T getClaimsFromToken(String token, Function<Claims, T> claimsResolver ){
-        final var claims = this.getAllClaimsFromToken(token);
-        return claimsResolver.apply(claims);
-    }
-
-    private Date getExpirationDateFromToken(String token){
-        return this.getClaimsFromToken(token, Claims::getExpiration);
-    }
-
-    private Boolean isTokenExpired(String token){
-        final var expirationDate = this.getExpirationDateFromToken(token);
-        return expirationDate.before(new Date());
-    }
-
-    private Boolean isNotTokenExpired(String token){
-        return !isTokenExpired(token);
-    }
-
-    public String getUsernameFromToken(String token){
-        return this.getClaimsFromToken(token, Claims::getSubject);
-    }
-
     public String generateToken(UserDetails userDetails){
         final Map<String, Object> claims = Collections.singletonMap("ROLES", userDetails.getAuthorities().toString());
         return this.getToken(claims, userDetails.getUsername());
@@ -62,11 +30,5 @@ public class JwtService {
         .signWith(key)
         .compact();
 
-    }
-
-    public Boolean validateToken(String token, UserDetails userDetails){
-        final var usernameFromUserDetails = userDetails.getUsername();
-        final var usernameFromJWT = this.getUsernameFromToken(token);
-        return(usernameFromUserDetails.equals(usernameFromJWT)) && this.isNotTokenExpired(token);
     }
 }

@@ -11,8 +11,6 @@ import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
-import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -56,9 +54,14 @@ public class SecurityConfig {
     }
 
     private void csrfConfiguration(CsrfConfigurer<HttpSecurity> csrfCustomizer){
-        csrfCustomizer.csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
-                                                    .ignoringRequestMatchers(ROUTE_AUTHENTICATION)
-                                                    .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
+        csrfCustomizer.ignoringRequestMatchers(ROUTE_AUTHENTICATION);
+    }
+
+    private CorsConfigurationSource corsConfigurationSource(){
+        var config = buildCorsConfiguration();
+        var source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration(ROUTE_AUTHENTICATION, config);
+        return source;
     }
 
     private CorsConfiguration buildCorsConfiguration(){
@@ -67,13 +70,5 @@ public class SecurityConfig {
         config.setAllowedMethods(List.of(POST));
         config.setAllowedHeaders(List.of(ALL));
         return config;
-
-    }
-
-    private CorsConfigurationSource corsConfigurationSource(){
-        var config = buildCorsConfiguration();
-        var source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration(ROUTE_AUTHENTICATION, config);
-        return source;
     }
 }
