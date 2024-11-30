@@ -19,7 +19,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
     private static final String ALL = "*";
     private static final String POST = "POST";
+    private static final String GET = "GET";
     private static final String ROUTE_AUTHENTICATION = "authenticate";
+    private static final String ROUTE_GET_ALL_CLAIMS = "get-all-clams";
 
     @Bean
     SecurityFilterChain securityFilterChaim( HttpSecurity http ) throws Exception{
@@ -58,17 +60,27 @@ public class SecurityConfig {
     }
 
     private CorsConfigurationSource corsConfigurationSource(){
-        var config = buildCorsConfiguration();
+        var configPost = buildCorsConfigurationForPost();
+        var configGet = buildCorsConfigurationForGet();
         var source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration(ROUTE_AUTHENTICATION, config);
+        source.registerCorsConfiguration(ROUTE_AUTHENTICATION, configPost);
+        source.registerCorsConfiguration(ROUTE_GET_ALL_CLAIMS, configGet);
         return source;
     }
 
-    private CorsConfiguration buildCorsConfiguration(){
+    private CorsConfiguration buildCorsConfigurationForPost(){
         var config = new CorsConfiguration();
         config.setAllowedOrigins(List.of(ALL));
-        config.setAllowedMethods(List.of(POST));
+        config.setAllowedMethods(List.of(POST, GET));
         config.setAllowedHeaders(List.of(ALL));
+        return config;
+    }
+
+    private CorsConfiguration buildCorsConfigurationForGet(){
+        var config = new CorsConfiguration();
+        config.setAllowedOrigins(List.of("http://localhost:8081")); // Solo para este origen
+        config.setAllowedMethods(List.of("GET"));
+        config.setAllowedHeaders(List.of("*"));
         return config;
     }
 }

@@ -6,7 +6,7 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.stereotype.Service;
-import com.jberdeja.idm_authenticator.entityes.JWTRequest;
+import com.jberdeja.idm_authenticator.entityes.JWTAuthenticateRequest;
 
 @Service
 public class AuthService {
@@ -17,24 +17,24 @@ public class AuthService {
     @Autowired
     private JwtService jwtService;
 
-    public String executeAuthentication(JWTRequest request){
-        this.authenticate(request);
-        return this.obtainToken(request);
+    public String executeAuthentication(JWTAuthenticateRequest request){
+        authenticate(request);
+        return obtainToken(request);
     }
-    private void authenticate(JWTRequest request){
+    private void authenticate(JWTAuthenticateRequest request){
         try {
-            this.authenticationManager.authenticate( buildUsernamePasswordAuthenticationToken(request));
+            authenticationManager.authenticate( buildUsernamePasswordAuthenticationToken(request));
         } catch (BadCredentialsException | DisabledException e) {
             throw new RuntimeException(e.getMessage());
         }
     }
 
-    private UsernamePasswordAuthenticationToken buildUsernamePasswordAuthenticationToken(JWTRequest request){
+    private UsernamePasswordAuthenticationToken buildUsernamePasswordAuthenticationToken(JWTAuthenticateRequest request){
         return new UsernamePasswordAuthenticationToken( request.getUsername(), request.getPassword());
     }
 
-    private String obtainToken(JWTRequest request){
-        var userDetails = this.jwtUserDetailService.loadUserByUsername(request.getUsername());
-        return this.jwtService.generateToken(userDetails);
+    private String obtainToken(JWTAuthenticateRequest request){
+        var userDetails = jwtUserDetailService.loadUserByUsername(request.getUsername());
+        return jwtService.generateToken(userDetails);
     }
 }
