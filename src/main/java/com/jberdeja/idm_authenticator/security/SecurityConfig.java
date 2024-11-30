@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.CorsConfigurer;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
@@ -25,7 +26,7 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChaim( HttpSecurity http ) throws Exception{
-        http.cors(cors-> corsConfigurationSource());
+        http.cors(cors-> corsConfigurationSource(cors));
         http.csrf(csrf-> csrfConfiguration(csrf));
         return http.build();
     }
@@ -59,28 +60,20 @@ public class SecurityConfig {
         csrfCustomizer.ignoringRequestMatchers(ROUTE_AUTHENTICATION);
     }
 
-    private CorsConfigurationSource corsConfigurationSource(){
-        var configPost = buildCorsConfigurationForPost();
-        var configGet = buildCorsConfigurationForGet();
-        var source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration(ROUTE_AUTHENTICATION, configPost);
-        source.registerCorsConfiguration(ROUTE_GET_ALL_CLAIMS, configGet);
+    private CorsConfigurationSource corsConfigurationSource(CorsConfigurer<HttpSecurity> httpSecurity){
+        CorsConfiguration configuration = buildCorsConfigurationForPost();
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);  // Aplica CORS a todas las rutas
+        httpSecurity.configurationSource(source);
         return source;
     }
 
     private CorsConfiguration buildCorsConfigurationForPost(){
         var config = new CorsConfiguration();
         config.setAllowedOrigins(List.of(ALL));
-        config.setAllowedMethods(List.of(POST, GET));
+        config.setAllowedMethods(List.of(ALL));
         config.setAllowedHeaders(List.of(ALL));
-        return config;
-    }
-
-    private CorsConfiguration buildCorsConfigurationForGet(){
-        var config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:8081")); // Solo para este origen
-        config.setAllowedMethods(List.of("GET"));
-        config.setAllowedHeaders(List.of("*"));
         return config;
     }
 }

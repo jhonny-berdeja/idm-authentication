@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import com.jberdeja.idm_authenticator.entityes.JWTAuthenticateRequest;
-import com.jberdeja.idm_authenticator.entityes.JWTRequest;
 import com.jberdeja.idm_authenticator.entityes.JWTResponse;
 import com.jberdeja.idm_authenticator.service.AuthService;
 import com.jberdeja.idm_authenticator.service.JwtService;
@@ -24,7 +23,7 @@ public class AuthController {
     
     @PostMapping("/authenticate")
     public ResponseEntity<?> authenticate(@RequestBody JWTAuthenticateRequest request){
-        final String token = authService.executeAuthentication(request);
+        String token = authService.executeAuthentication(request);
         return ResponseEntity.ok(new JWTResponse(token));
     }
 
