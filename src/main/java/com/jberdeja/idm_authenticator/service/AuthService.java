@@ -4,7 +4,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.stereotype.Service;
 import com.jberdeja.idm_authenticator.entityes.JWTAuthenticateRequest;
 
@@ -13,7 +12,7 @@ public class AuthService {
     @Autowired
     private AuthenticationManager authenticationManager;
     @Autowired
-    private InMemoryUserDetailsManager jwtUserDetailService;
+    private UserIDMDetailsService jwtUserDetailService;
     @Autowired
     private JwtService jwtService;
 

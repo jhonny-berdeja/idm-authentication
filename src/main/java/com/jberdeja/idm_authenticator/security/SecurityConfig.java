@@ -7,10 +7,8 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.CorsConfigurer;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -32,21 +30,6 @@ public class SecurityConfig {
     }
 
     @Bean
-    InMemoryUserDetailsManager inMemoryUserDetailsManager(){
-        var admin = User.withUsername("admin")
-        .password("to_be_encoded")
-        .authorities("CARDS")
-        .build();
-
-        var user = User.withUsername("user")
-        .password("to_be_encoded")
-        .authorities("CARDS")
-        .build();
-
-        return new InMemoryUserDetailsManager(admin, user);
-    }
-
-    @Bean
     PasswordEncoder passwordEncoder(){
         return NoOpPasswordEncoder.getInstance();
     } 
@@ -64,7 +47,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = buildCorsConfigurationForPost();
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);  // Aplica CORS a todas las rutas
+        source.registerCorsConfiguration("/**", configuration); 
         httpSecurity.configurationSource(source);
         return source;
     }
