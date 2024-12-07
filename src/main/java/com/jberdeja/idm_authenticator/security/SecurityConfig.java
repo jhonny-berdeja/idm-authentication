@@ -5,11 +5,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
+import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer.AuthorizationManagerRequestMatcherRegistry;
 import org.springframework.security.config.annotation.web.configurers.CorsConfigurer;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -23,49 +26,61 @@ public class SecurityConfig {
     private static final String ROUTE_GET_ALL_CLAIMS = "/get-all-clams/**";
 
     @Bean
-    SecurityFilterChain securityFilterChaim( HttpSecurity http ) throws Exception{
-        http.cors(cors-> corsConfigurationSource(cors));
-        http.csrf(csrf-> csrfConfiguration(csrf));
+    SecurityFilterChain securityFilterChain(HttpSecurity http, JwtValidationFilter jwtValidationFilter) throws Exception {
+        http.addFilterBefore(jwtValidationFilter, UsernamePasswordAuthenticationFilter.class);
+        http.authorizeHttpRequests(auth -> authorizeHttpRequestsConfigurer(auth));
+        http.csrf(csrf -> csrfConfiguration(csrf));
+        http.cors(cors -> corsConfigurationSource(cors));
+        
         return http.build();
     }
 
+    @SuppressWarnings("deprecation")
     @Bean
-    PasswordEncoder passwordEncoder(){
+    PasswordEncoder passwordEncoder() {
         return NoOpPasswordEncoder.getInstance();
-    } 
+    }
 
     @Bean
-    AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception{
+    AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
     }
 
-    private void csrfConfiguration(CsrfConfigurer<HttpSecurity> csrfCustomizer){
-        csrfCustomizer.ignoringRequestMatchers(ROUTE_AUTHENTICATION, ROUTE_GET_ALL_CLAIMS);
+    private void csrfConfiguration(CsrfConfigurer<HttpSecurity> csrfCustomizer) {
+        csrfCustomizer.ignoringRequestMatchers(ROUTE_AUTHENTICATION);
     }
 
-    private CorsConfigurationSource corsConfigurationSource(CorsConfigurer<HttpSecurity> httpSecurity){
-        CorsConfiguration configurationPost = buildCorsConfigurationForPost();
-        CorsConfiguration configurationGet = buildCorsConfigurationForGet();
+    @SuppressWarnings("rawtypes")
+    private AuthorizationManagerRequestMatcherRegistry authorizeHttpRequestsConfigurer( 
+                            AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry auth) {
+        auth.requestMatchers(ROUTE_AUTHENTICATION).permitAll();
+        auth.requestMatchers(ROUTE_GET_ALL_CLAIMS).authenticated();
+        return auth;
+    }
+
+    CorsConfigurationSource corsConfigurationSource(CorsConfigurer<HttpSecurity> httpSecurity){
+        CorsConfiguration postConfig = corsConfigurationForPost();
+        CorsConfiguration getConfig = corsConfigurationForGet();
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration(ROUTE_AUTHENTICATION, configurationPost); 
-        source.registerCorsConfiguration(ROUTE_GET_ALL_CLAIMS, configurationGet); 
+        source.registerCorsConfiguration(ROUTE_AUTHENTICATION, postConfig);
+        source.registerCorsConfiguration(ROUTE_GET_ALL_CLAIMS, getConfig);
         httpSecurity.configurationSource(source);
         return source;
     }
 
-    private CorsConfiguration buildCorsConfigurationForPost(){
-        var config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of(ALL));
-        config.setAllowedMethods(List.of(POST));
-        config.setAllowedHeaders(List.of(ALL));
-        return config;
-    }
+    private CorsConfiguration corsConfigurationForPost(){
+        CorsConfiguration postConfig = new CorsConfiguration();
+        postConfig.setAllowedOrigins(List.of(ALL));
+        postConfig.setAllowedMethods(List.of(POST));
+        postConfig.setAllowedHeaders(List.of(ALL));
+        return postConfig;
+    }    
 
-    private CorsConfiguration buildCorsConfigurationForGet(){
-        var config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of(ALL));
-        config.setAllowedMethods(List.of(GET));
-        config.setAllowedHeaders(List.of(ALL));
-        return config;
+    private CorsConfiguration corsConfigurationForGet(){
+        CorsConfiguration getConfig = new CorsConfiguration();
+        getConfig.setAllowedOrigins(List.of(ALL));
+        getConfig.setAllowedMethods(List.of(GET));
+        getConfig.setAllowedHeaders(List.of(ALL));
+        return getConfig;
     }
 }

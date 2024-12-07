@@ -2,6 +2,7 @@ package com.jberdeja.idm_authenticator.entityes;
 
 import java.util.List;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -23,7 +24,7 @@ public class UserIDMEntity {
 
     private String pwd;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "user_roles_idm",
         joinColumns = @JoinColumn(name = "user_id"),

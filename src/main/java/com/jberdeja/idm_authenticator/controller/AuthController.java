@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.jberdeja.idm_authenticator.entityes.JWTAuthenticateRequest;
 import com.jberdeja.idm_authenticator.entityes.JWTResponse;
 import com.jberdeja.idm_authenticator.service.AuthService;
-import com.jberdeja.idm_authenticator.service.JwtService;
+import com.jberdeja.idm_authenticator.service.ClaimsService;
 import io.jsonwebtoken.Claims;
 
 @RestController
@@ -20,22 +20,22 @@ public class AuthController {
     private AuthService authService;
     
     @Autowired
-    private JwtService jwtService;
+    private ClaimsService claimsService;
     
     @PostMapping("/authenticate")
     public ResponseEntity<?> authenticate(@Validated @RequestBody JWTAuthenticateRequest request){
         try{
-            JWTResponse response = authService.authenticate(request);
+            JWTResponse response = authService.authenticateUser(request);
             return ResponseEntity.ok(response);
         }catch(Exception e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
-
+//Cuando no se envia jwt spring security rechasa la solicitud, esto esta mal, solo deveria responder que jwt es nulo
     @GetMapping("/get-all-clams/{jwt}")
     public ResponseEntity<?> getAllClaims(@PathVariable String jwt){
         try{
-            Claims claims = jwtService.getAllClaims(jwt);
+            Claims claims = claimsService.getClaimsFromToken(jwt);
             return ResponseEntity.ok(claims);
         }catch(Exception e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
