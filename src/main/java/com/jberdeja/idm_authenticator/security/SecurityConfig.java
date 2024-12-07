@@ -72,15 +72,15 @@ public class SecurityConfig {
         CorsConfiguration postConfig = new CorsConfiguration();
         postConfig.setAllowedOrigins(List.of(ALL));
         postConfig.setAllowedMethods(List.of(POST));
-        postConfig.setAllowedHeaders(List.of(ALL));
+        postConfig.setAllowedHeaders(List.of(ALL));//Falta limitar los header
         return postConfig;
     }    
 
     private CorsConfiguration corsConfigurationForGet(){
         CorsConfiguration getConfig = new CorsConfiguration();
-        getConfig.setAllowedOrigins(List.of(ALL));
+        getConfig.setAllowedOrigins(List.of(ALL));//Cuando configuremos el DNS de los containers el origen sera unico
         getConfig.setAllowedMethods(List.of(GET));
-        getConfig.setAllowedHeaders(List.of(ALL));
+        getConfig.setAllowedHeaders(List.of(ALL));//Falta limitar los header
         return getConfig;
     }
 }
