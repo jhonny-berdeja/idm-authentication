@@ -6,24 +6,32 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 import com.jberdeja.idm_authenticator.entityes.JWTAuthenticateRequest;
+import com.jberdeja.idm_authenticator.entityes.JWTResponse;
+import lombok.extern.slf4j.Slf4j;
 
+
+@Slf4j
 @Service
 public class AuthService {
     @Autowired
     private AuthenticationManager authenticationManager;
     @Autowired
-    private UserIDMDetailsService jwtUserDetailService;
+    private UserIDMDetailsService userIDMDetailsService;
     @Autowired
     private JwtService jwtService;
 
-    public String executeAuthentication(JWTAuthenticateRequest request){
-        authenticate(request);
-        return obtainToken(request);
+    public JWTResponse authenticate(JWTAuthenticateRequest request){
+        log.info("starting authentication");
+        authenticateWhitCredentials(request);
+        String jwt = generateToken(request);
+        log.info("finalized authentication ok");
+        return new JWTResponse(jwt);
     }
-    private void authenticate(JWTAuthenticateRequest request){
+    private void authenticateWhitCredentials(JWTAuthenticateRequest request){
         try {
             authenticationManager.authenticate( buildUsernamePasswordAuthenticationToken(request));
-        } catch (BadCredentialsException | DisabledException e) {
+        } catch (Exception e) {
+            log.error("Error authenticating with credentials", e);
             throw new RuntimeException(e.getMessage());
         }
     }
@@ -32,8 +40,8 @@ public class AuthService {
         return new UsernamePasswordAuthenticationToken( request.getUsername(), request.getPassword());
     }
 
-    private String obtainToken(JWTAuthenticateRequest request){
-        var userDetails = jwtUserDetailService.loadUserByUsername(request.getUsername());
+    private String generateToken(JWTAuthenticateRequest request){
+        var userDetails = userIDMDetailsService.loadUserByUsername(request.getUsername());
         return jwtService.generateToken(userDetails);
     }
 }

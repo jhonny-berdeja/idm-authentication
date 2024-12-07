@@ -12,24 +12,22 @@ import lombok.AllArgsConstructor;
 @Service
 @AllArgsConstructor
 public class UserIDMDetailsService implements UserDetailsService{
-
     private final UserIDMRepository userIDMRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return userIDMRepository.findByEmail(username)
             .map(
-
-                customer->{ 
-                    final var authorities = customer.getRoles()
+                user->{ 
+                    final var authorities = user.getRoles()
                     .stream()
                     .map(
                         role->new SimpleGrantedAuthority(role.getRoleName())
                     ).toList();
 
-                return new User(customer.getEmail(), customer.getPwd(), authorities);
+                return new User(user.getEmail(), user.getPwd(), authorities);
 
-        }).orElseThrow(()->new UsernameNotFoundException("User not exist"));
+        }).orElseThrow(()->new UsernameNotFoundException("User not exist " + username));
     }
 
 

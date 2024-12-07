@@ -19,8 +19,8 @@ public class SecurityConfig {
     private static final String ALL = "*";
     private static final String POST = "POST";
     private static final String GET = "GET";
-    private static final String ROUTE_AUTHENTICATION = "authenticate";
-    private static final String ROUTE_GET_ALL_CLAIMS = "get-all-clams";
+    private static final String ROUTE_AUTHENTICATION = "/authenticate";
+    private static final String ROUTE_GET_ALL_CLAIMS = "/get-all-clams/**";
 
     @Bean
     SecurityFilterChain securityFilterChaim( HttpSecurity http ) throws Exception{
@@ -40,14 +40,15 @@ public class SecurityConfig {
     }
 
     private void csrfConfiguration(CsrfConfigurer<HttpSecurity> csrfCustomizer){
-        csrfCustomizer.ignoringRequestMatchers(ROUTE_AUTHENTICATION);
+        csrfCustomizer.ignoringRequestMatchers(ROUTE_AUTHENTICATION, ROUTE_GET_ALL_CLAIMS);
     }
 
     private CorsConfigurationSource corsConfigurationSource(CorsConfigurer<HttpSecurity> httpSecurity){
-        CorsConfiguration configuration = buildCorsConfigurationForPost();
-
+        CorsConfiguration configurationPost = buildCorsConfigurationForPost();
+        CorsConfiguration configurationGet = buildCorsConfigurationForGet();
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration); 
+        source.registerCorsConfiguration(ROUTE_AUTHENTICATION, configurationPost); 
+        source.registerCorsConfiguration(ROUTE_GET_ALL_CLAIMS, configurationGet); 
         httpSecurity.configurationSource(source);
         return source;
     }
@@ -55,7 +56,15 @@ public class SecurityConfig {
     private CorsConfiguration buildCorsConfigurationForPost(){
         var config = new CorsConfiguration();
         config.setAllowedOrigins(List.of(ALL));
-        config.setAllowedMethods(List.of(ALL));
+        config.setAllowedMethods(List.of(POST));
+        config.setAllowedHeaders(List.of(ALL));
+        return config;
+    }
+
+    private CorsConfiguration buildCorsConfigurationForGet(){
+        var config = new CorsConfiguration();
+        config.setAllowedOrigins(List.of(ALL));
+        config.setAllowedMethods(List.of(GET));
         config.setAllowedHeaders(List.of(ALL));
         return config;
     }
