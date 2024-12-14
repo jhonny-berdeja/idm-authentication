@@ -28,7 +28,7 @@ public class AuthController {
             JWTResponse response = authService.authenticateUser(request);
             return ResponseEntity.ok(response);
         }catch(Exception e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());// falta retornar bien el SERVER_ERROR
         }
     }
 //Cuando no se envia jwt spring security rechasa la solicitud, esto esta mal, solo deveria responder que jwt es nulo
@@ -38,7 +38,7 @@ public class AuthController {
             Claims claims = claimsService.getClaimsFromToken(jwt);
             return ResponseEntity.ok(claims);
         }catch(Exception e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());// falta retornar bien el SERVER_ERROR
         }        
     }
 }
